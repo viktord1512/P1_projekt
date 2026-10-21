@@ -1,0 +1,81 @@
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.decomposition import PCA
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import OneHotEncoder
+
+# Indlæs heart-datasættet
+heart = pd.read_csv("C:\\Users\\vikto\\Universitet\\1_semester\\Projekt - P1\\heart.csv")
+
+# standardiser numeriske features
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+
+# nonnumeric_features = [1, 2, 6, 8, 10]
+# numeric_features = [0, 3, 4, 5, 7, 9]
+
+nonnumeric_features = [2, 8, 10]
+numeric_features = [7, 9]
+
+#onehot encoding for kategoriske features
+encoder = OneHotEncoder()
+X_categorical = encoder.fit_transform(heart.iloc[:, nonnumeric_features]).toarray()
+X_numerical = scaler.fit_transform(heart.iloc[:, numeric_features].values)
+X = np.hstack((X_numerical, X_categorical))
+y = heart.iloc[:, -1].values
+# X_numerical = scaler.fit_transform(X_numerical)
+
+# Opdel data i trænings- og testdata
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+last_k = 21
+# Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
+for n_neighbors in range(1, last_k+1, 2):
+    model = KNeighborsClassifier(n_neighbors=n_neighbors)
+
+    # Træn modellen
+    model.fit(X_train, y_train)
+
+    # Forudsigelser på testdata
+    y_pred = model.predict(X_test)
+
+    # Beregn nøjagtighed
+    accuracy = accuracy_score(y_test, y_pred)
+
+    print(f"K = {n_neighbors}: {accuracy:.2f}")
+
+# confusion matrix med visualization
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# cm = confusion_matrix(y_test, y_pred)
+# print("Confusion Matrix:")
+# print(cm)
+
+# plt.figure(figsize=(8, 6))
+# sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+# plt.xlabel("Predicted")
+# plt.ylabel("Actual")
+# plt.title("Confusion Matrix")
+# plt.show()
+
+from mlxtend.plotting import plot_decision_regions
+plot_decision_regions(X=X, y=y, clf=model, legend=2)
+
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.title(f"KNN med {last_k}")
+
+plt.show()
+
+
+# # Klassificér en ny patient
+# ny_patient = [[54,1,0,120,188,0,1,113,0,1.4,1,1,3]]
+# resultat = model.predict(ny_patient)
+
+# print("Forudsagt klasse:", resultat[0])
