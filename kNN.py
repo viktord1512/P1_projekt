@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
 # Indlæs heart-datasættet
-heart = pd.read_csv("C:\\Users\\vikto\\Universitet\\1_semester\\Projekt - P1\\heart.csv")
+heart = pd.read_csv("heart.csv")
 
 # standardiser numeriske features
 from sklearn.preprocessing import StandardScaler
@@ -65,14 +65,17 @@ import seaborn as sns
 # plt.show()
 
 from mlxtend.plotting import plot_decision_regions
-plot_decision_regions(X=X, y=y, clf=model, legend=2)
+from sklearn.decomposition import PCA
+X_2d = PCA(n_components=2).fit_transform(X)
 
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.title(f"KNN med {last_k}")
+# Træn en kNN på de 2D-data (kun til plottet)
+viz_model = KNeighborsClassifier(n_neighbors=last_k).fit(X_2d, y)
 
+plot_decision_regions(X=X_2d, y=y, clf=viz_model, legend=2)
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.title(f"KNN med k={last_k}")
 plt.show()
-
 
 # # Klassificér en ny patient
 # ny_patient = [[54,1,0,120,188,0,1,113,0,1.4,1,1,3]]
