@@ -53,8 +53,6 @@ for n_neighbors in range(1, last_k+1, 2):
     print(f"K = {n_neighbors}: {accuracy:.5f}")
 
 # confusion matrix med visualization
-
-
 cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
