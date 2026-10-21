@@ -2,9 +2,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA
+from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import OneHotEncoder
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
+
 
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
@@ -52,9 +56,7 @@ for n_neighbors in range(1, last_k+1, 2):
     print(f"K = {n_neighbors}: {accuracy:.5f}")
 
 # confusion matrix med visualization
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")

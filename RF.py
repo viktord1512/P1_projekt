@@ -1,11 +1,29 @@
+import pandas as pd
+import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 
-# Indlæs Iris-datasættet
-iris = load_iris()
-X, y = iris.data, iris.target
+# Indlæs heart-datasættet
+heart = pd.read_csv("heart.csv")
+
+# Brug kun de første 12 rækker af datasættet for både X og y
+X = heart.iloc[:12, :-1].values
+y = heart.iloc[:12, -1].values
+
+#onehot encoding for kategoriske features
+nonnumeric_features = [1, 2, 6, 8, 10]
+numeric_features = [0,3, 4, 5, 7, 9]
+encoder = OneHotEncoder()
+X_categorical = encoder.fit_transform(heart.iloc[:, nonnumeric_features]).toarray()
+
+#skaler numeriske features
+scaler = StandardScaler()
+X_numerical = scaler.fit_transform(heart.iloc[:, numeric_features].values)
+X = np.hstack((X_numerical, X_categorical))
+y = heart.iloc[:, -1].values
 
 # Opdel data i træn- og testdata (80% træning, 20% test)
 X_train, X_test, y_train, y_test = train_test_split(
@@ -22,4 +40,4 @@ y_pred = rf_model.predict(X_test)
 # Evaluer modellen
 print(f"Nøjagtighed (Accuracy): {accuracy_score(y_test, y_pred):.2f}\n")
 print("Klassifikationsrapport:")
-print(classification_report(y_test, y_pred, target_names=iris.target_names))
+print(classification_report(y_test, y_pred))
