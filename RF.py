@@ -1,12 +1,12 @@
+import pandas as pd
+import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 
 # Indlæs heart-datasættet
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 heart = pd.read_csv("heart.csv")
 
 # Brug kun de første 12 rækker af datasættet for både X og y
