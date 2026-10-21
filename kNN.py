@@ -22,15 +22,18 @@ numeric_features = [3, 5, 9]
 #onehot encoding for kategoriske features
 encoder = OneHotEncoder()
 X_categorical = encoder.fit_transform(heart.iloc[:, nonnumeric_features]).toarray()
-X_numerical = scaler.fit_transform(heart.iloc[:, numeric_features].values)
+X_numerical = heart.iloc[:, numeric_features].values
 X = np.hstack((X_numerical, X_categorical))
 y = heart.iloc[:, -1].values
-# X_numerical = scaler.fit_transform(X_numerical)
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.fit_transform(X_test)
+
 
 last_k = 25
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
