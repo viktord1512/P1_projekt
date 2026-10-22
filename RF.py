@@ -6,7 +6,11 @@ from sklearn.ensemble import RandomForestClassifier # til Random Forest-klassifi
 from sklearn.model_selection import train_test_split # til opdeling af datasæt i trænings- og testdata
 from sklearn.preprocessing import OneHotEncoder, StandardScaler # til one-hot encoding og standardisering af features
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix # til evaluering af modelens præstation og beregning af confusion matrix
+import time
 
+
+# lav en timer der viser tiden det tager at køre koden
+start_time = time.time()
 
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
@@ -47,18 +51,20 @@ print(f"Nøjagtighed (Accuracy): {accuracy_score(y_test, y_pred):.2f}\n")
 print("Klassifikationsrapport:")
 print(classification_report(y_test, y_pred))
 
-# confusion matrix med visualization
-cm = confusion_matrix(y_test, y_pred)
-print("Confusion Matrix:")
-print(cm)
+# # confusion matrix med visualization
+# cm = confusion_matrix(y_test, y_pred)
+# print("Confusion Matrix:")
+# print(cm)
 
+# cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
+# plt.figure(figsize=(8, 6))
+# sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
+# plt.xlabel("Predicted")
+# plt.ylabel("Actual")
+# plt.title("Confusion Matrix")
+# plt.show()
 
-cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.title("Confusion Matrix")
-plt.show()
+# Koden der skal måles går her (hele scriptet)
+end_time = time.time()
+print(f"Tiden det tog at køre koden: {end_time - start_time:.2f} sekunder")
