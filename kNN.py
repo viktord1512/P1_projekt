@@ -88,6 +88,7 @@ plt.show()
 # print("Forudsagt klasse:", resultat[0])
 
 # # Klassificér en ny patient
+
 # ny_patient = [[54,1,0,120,188,0,1,113,0,1.4,1,1,3]]
 # resultat = model.predict(ny_patient)
 
