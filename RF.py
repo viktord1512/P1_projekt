@@ -1,13 +1,14 @@
-import pandas as pd
 import numpy as np
-from sklearn.datasets import load_iris
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.metrics import accuracy_score, classification_report
+
 
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")

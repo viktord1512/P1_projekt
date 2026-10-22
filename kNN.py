@@ -1,13 +1,13 @@
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.decomposition import PCA
-from sklearn.metrics import confusion_matrix
-from sklearn.preprocessing import OneHotEncoder
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og confusion matrixer
+import seaborn as sns # til udregning af heatmaps, fx confusion matrix
+import pandas as pd # til håndtering af datasæt som DataFrame, hvor dataframes gør det nemt at manipulere og analysere data
+import numpy as np # til numeriske operationer og array-manipulationer, hvor arrays bruges til at gemme og manipulere data effektivt
+from sklearn.model_selection import train_test_split # til opdeling af datasæt i trænings- og testdata
+from sklearn.neighbors import KNeighborsClassifier # til kNN-klassifikation
+from sklearn.metrics import accuracy_score # til beregning af nøjagtighed
+from sklearn.decomposition import PCA # hjælper med at visualisere vorees 11 dimentioner til 2D
+from sklearn.metrics import confusion_matrix # til beregning af confusion matrix
+from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af kategoriske features
 
 
 # Indlæs heart-datasættet
@@ -27,6 +27,8 @@ numeric_features = [3, 5, 9]
 encoder = OneHotEncoder()
 X_categorical = encoder.fit_transform(heart.iloc[:, nonnumeric_features]).toarray()
 X_numerical = heart.iloc[:, numeric_features].values
+
+# Gemmer vores matrix, som er en liste af en liste
 X = np.hstack((X_numerical, X_categorical))
 y = heart.iloc[:, -1].values
 
@@ -55,13 +57,15 @@ for n_neighbors in range(1, last_k+1, 2):
 
     print(f"K = {n_neighbors}: {accuracy:.5f}")
 
-# confusion matrix med visualization
+# Beregning af confusion matrix
 cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
+# visualisering i terminal
 print(cm)
 
 cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
+# visualisering af confusion matrix
 plt.figure(figsize=(8, 6))
 sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
 plt.xlabel("Predicted")
