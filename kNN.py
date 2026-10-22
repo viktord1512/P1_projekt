@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og conf
 import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import pandas as pd # til håndtering af datasæt som DataFrame, hvor dataframes gør det nemt at manipulere og analysere data
 import numpy as np # til numeriske operationer og array-manipulationer, hvor arrays bruges til at gemme og manipulere data effektivt
+from collections import OrderedDict # bedre dictionary
 from sklearn.model_selection import train_test_split # til opdeling af datasæt i trænings- og testdata
 from sklearn.neighbors import KNeighborsClassifier # til kNN-klassifikation
 from sklearn.metrics import accuracy_score # til beregning af nøjagtighed
@@ -13,6 +14,8 @@ from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af katego
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
 
+results = OrderedDict()
+
 # standardiser numeriske features
 from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler()
@@ -20,8 +23,8 @@ scaler = StandardScaler()
 # nonnumeric_features = [1, 2, 6, 8, 10]
 # numeric_features = [0, 3, 4, 5, 7, 9]
 
-nonnumeric_features = [1, 8, 10]
-numeric_features = [3, 5, 9]
+nonnumeric_features = [1, 2, 6, 8, 10]
+numeric_features = [0, 3, 4, 5, 7, 9]
 
 #onehot encoding for kategoriske features
 encoder = OneHotEncoder()
@@ -34,14 +37,14 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X, y, test_size=0.25, random_state=42
 )
 
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.fit_transform(X_test)
 
 
-last_k = 25
+last_k = 21
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
 for n_neighbors in range(1, last_k+1, 2):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
@@ -54,24 +57,31 @@ for n_neighbors in range(1, last_k+1, 2):
 
     # Beregn nøjagtighed
     accuracy = accuracy_score(y_test, y_pred)
-
+    results[n_neighbors] = accuracy
     print(f"K = {n_neighbors}: {accuracy:.5f}")
 
 # Beregning af confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-print("Confusion Matrix:")
+# cm = confusion_matrix(y_test, y_pred)
 # visualisering i terminal
-print(cm)
+# print("Confusion Matrix:")
+# print(cm)
 
-cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+# cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
 # visualisering af confusion matrix
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.title("Confusion Matrix")
-plt.show()
+# plt.figure(figsize=(8, 6))
+# sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
+# plt.xlabel("Predicted")
+# plt.ylabel("Actual")
+# plt.title("Confusion Matrix")
+# plt.show()
+
+
+sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
+print(f"Best K = {next(reversed(sorted_results))}\n"
+      f"Accuracy = {next(reversed(sorted_results.values()))}")
+
+
 
 # from mlxtend.plotting import plot_decision_regions
 # from sklearn.decomposition import PCA
@@ -86,14 +96,3 @@ plt.show()
 # plt.title(f"KNN med k={last_k}")
 # plt.show()
 
-# ny_patient = [[54,1,0,120,188,0,1,113,0,1.4,1,1,3]]
-# resultat = model.predict(ny_patient)
-
-# print("Forudsagt klasse:", resultat[0])
-
-# # Klassificér en ny patient
-
-# ny_patient = [[54,1,0,120,188,0,1,113,0,1.4,1,1,3]]
-# resultat = model.predict(ny_patient)
-
-# print("Forudsagt klasse:", resultat[0])
