@@ -73,18 +73,18 @@ plt.ylabel("Actual")
 plt.title("Confusion Matrix")
 plt.show()
 
-# from mlxtend.plotting import plot_decision_regions
-# from sklearn.decomposition import PCA
-# X_2d = PCA(n_components=2).fit_transform(X)
+from mlxtend.plotting import plot_decision_regions
+from sklearn.decomposition import PCA
+X_2d = PCA(n_components=2).fit_transform(X)
 
-# # Træn en kNN på de 2D-data (kun til plottet)
-# viz_model = KNeighborsClassifier(n_neighbors=last_k).fit(X_2d, y)
+# Træn en kNN på de 2D-data (kun til plottet)
+viz_model = KNeighborsClassifier(n_neighbors=last_k).fit(X_2d, y)
 
-# plot_decision_regions(X=X_2d, y=y, clf=viz_model, legend=2)
-# plt.xlabel("PC1")
-# plt.ylabel("PC2")
-# plt.title(f"KNN med k={last_k}")
-# plt.show()
+plot_decision_regions(X=X_2d, y=y, clf=viz_model, legend=2)
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.title(f"KNN med k={last_k}")
+plt.show()
 
 # ny_patient = [[54,1,0,120,188,0,1,113,0,1.4,1,1,3]]
 # resultat = model.predict(ny_patient)
