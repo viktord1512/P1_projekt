@@ -29,7 +29,7 @@ min_max_scaler = MinMaxScaler()
 # numeric_features = [0, 3, 4, 5, 7, 9]
 
 nonnumeric_features = [1, 2, 6, 8, 10]
-numeric_features = [0, 3, 4, 5, 7, 9]
+numeric_features = [0, 3, 5, 7, 9]
 
 #onehot encoding for kategoriske features
 encoder = OneHotEncoder()
@@ -46,16 +46,23 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 #bedste test_size jeg kan finde ved trial and error er 0.30 hvor k=19 (stan)
 
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(strategy="median", add_indicator=True)
+
+X_train = imputer.fit_transform(X_train)
+
+print(heart)
+
 X_train = standard_scaler.fit_transform(X_train)
-X_test = standard_scaler.fit_transform(X_test)
+X_test = standard_scaler.transform(X_test)
 # X_train = norm_scaler.fit_transform(X_train)
-# X_test = norm_scaler.fit_transform(X_test)
+# X_test = norm_scaler.transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
-# X_test = min_max_scaler.fit_transform(X_test)
+# X_test = min_max_scaler.transform(X_test)
 
 # normalize scaler er ass, minmax er tæt på standard, men standard er bedst til datasættet
 
-last_k = 19
+last_k = 83
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
 for n_neighbors in range(1, last_k+1, 2):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
@@ -93,9 +100,9 @@ plt.title("Confusion Matrix")
 plt.show()
 
 # # For at teste k værdier. Viser kun den bedste med dens accuracy, hvis man vil have cm og precision/recall så skal man manuelt sætte k
-# sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
-# print(f"Best K = {next(reversed(sorted_results))}\n"
-#       f"Accuracy = {next(reversed(sorted_results.values()))}")
+sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
+print(f"Best K = {next(reversed(sorted_results))}\n"
+      f"Accuracy = {next(reversed(sorted_results.values()))}")
 
 
 
