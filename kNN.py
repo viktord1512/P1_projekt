@@ -52,6 +52,8 @@ X_test = standard_scaler.fit_transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.fit_transform(X_test)
 
+#normalize scaler er ass, minmax er tæt på standard, men standard er bedst til datasættet
+
 last_k = 101
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
 for n_neighbors in range(1, last_k+1, 2):
