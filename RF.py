@@ -41,10 +41,10 @@ X_test = scaler.fit_transform(X_test)
 
 # Initialiser og træn Random Forest-modellen
 rf_model = RandomForestClassifier(
-    n_estimators=200, 
-    random_state=42,
-    min_samples_leaf=2,
-    min_samples_split=5
+    n_estimators=200, # antal træer i skoven
+    random_state=42, # sikrer reproducerbare resultater
+    min_samples_leaf=2, # minimum antal prøver der kræves i et blad, hvor et blad er en endenode i træet
+    min_samples_split=5 # minimum antal prøver der kræves for at splitte en intern node
 )
 rf_model.fit(X_train, y_train)
 
