@@ -29,7 +29,7 @@ min_max_scaler = MinMaxScaler()
 # numeric_features = [0, 3, 4, 5, 7, 9]
 
 nonnumeric_features = [1, 2, 6, 8, 10]
-numeric_features = [0, 3, 5, 7, 9]
+numeric_features = [0, 3, 4, 5, 7, 9]
 
 #onehot encoding for kategoriske features
 encoder = OneHotEncoder()
@@ -44,7 +44,6 @@ y = heart.iloc[:, -1].values
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.30, random_state=42
 )
-#bedste test_size jeg kan finde ved trial and error er 0.30 hvor k=19 (stan)
 
 from sklearn.impute import SimpleImputer
 imputer = SimpleImputer(strategy="median", add_indicator=True)
