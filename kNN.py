@@ -42,8 +42,9 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=42
+    X, y, test_size=0.30, random_state=42
 )
+#bedste test_size jeg kan finde ved trial and error er 0.30 hvor k=19 (stan)
 
 X_train = standard_scaler.fit_transform(X_train)
 X_test = standard_scaler.fit_transform(X_test)
@@ -52,9 +53,9 @@ X_test = standard_scaler.fit_transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.fit_transform(X_test)
 
-#normalize scaler er ass, minmax er tæt på standard, men standard er bedst til datasættet
+# normalize scaler er ass, minmax er tæt på standard, men standard er bedst til datasættet
 
-last_k = 101
+last_k = 19
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
 for n_neighbors in range(1, last_k+1, 2):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
@@ -76,20 +77,25 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
-# cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+from sklearn.metrics import precision_score, recall_score
+print(f"Precision: {precision_score(y_test,y_pred)*100:.5}%")
+print(f"Recall: {recall_score(y_test, y_pred)*100:.5}%")
+print(f"Accuracy: {accuracy_score(y_test, y_pred)*100:.5}%")
+
+cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
 # visualisering af confusion matrix
-# plt.figure(figsize=(8, 6))
-# sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
-# plt.xlabel("Predicted")
-# plt.ylabel("Actual")
-# plt.title("Confusion Matrix")
-# plt.show()
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
 
-
-sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
-print(f"Best K = {next(reversed(sorted_results))}\n"
-      f"Accuracy = {next(reversed(sorted_results.values()))}")
+# # For at teste k værdier. Viser kun den bedste med dens accuracy, hvis man vil have cm og precision/recall så skal man manuelt sætte k
+# sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
+# print(f"Best K = {next(reversed(sorted_results))}\n"
+#       f"Accuracy = {next(reversed(sorted_results.values()))}")
 
 
 
