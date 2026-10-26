@@ -18,7 +18,12 @@ results = OrderedDict()
 
 # standardiser numeriske features
 from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import MinMaxScaler
+standard_scaler = StandardScaler()
+norm_scaler = Normalizer()
+min_max_scaler = MinMaxScaler()
+
 
 # nonnumeric_features = [1, 2, 6, 8, 10]
 # numeric_features = [0, 3, 4, 5, 7, 9]
@@ -40,11 +45,14 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.25, random_state=42
 )
 
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.fit_transform(X_test)
+X_train = standard_scaler.fit_transform(X_train)
+X_test = standard_scaler.fit_transform(X_test)
+# X_train = norm_scaler.fit_transform(X_train)
+# X_test = norm_scaler.fit_transform(X_test)
+# X_train = min_max_scaler.fit_transform(X_train)
+# X_test = min_max_scaler.fit_transform(X_test)
 
-
-last_k = 21
+last_k = 101
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
 for n_neighbors in range(1, last_k+1, 2):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
@@ -61,10 +69,10 @@ for n_neighbors in range(1, last_k+1, 2):
     print(f"K = {n_neighbors}: {accuracy:.5f}")
 
 # Beregning af confusion matrix
-# cm = confusion_matrix(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)
 # visualisering i terminal
-# print("Confusion Matrix:")
-# print(cm)
+print("Confusion Matrix:")
+print(cm)
 
 # cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
@@ -83,16 +91,16 @@ print(f"Best K = {next(reversed(sorted_results))}\n"
 
 
 
-from mlxtend.plotting import plot_decision_regions
-from sklearn.decomposition import PCA
-X_2d = PCA(n_components=2).fit_transform(X)
-
-# Træn en kNN på de 2D-data (kun til plottet)
-viz_model = KNeighborsClassifier(n_neighbors=last_k).fit(X_2d, y)
-
-plot_decision_regions(X=X_2d, y=y, clf=viz_model, legend=2)
-plt.xlabel("PC1")
-plt.ylabel("PC2")
-plt.title(f"KNN med k={last_k}")
-plt.show()
+# from mlxtend.plotting import plot_decision_regions
+# from sklearn.decomposition import PCA
+# X_2d = PCA(n_components=2).fit_transform(X)
+#
+# # Træn en kNN på de 2D-data (kun til plottet)
+# viz_model = KNeighborsClassifier(n_neighbors=last_k).fit(X_2d, y)
+#
+# plot_decision_regions(X=X_2d, y=y, clf=viz_model, legend=2)
+# plt.xlabel("PC1")
+# plt.ylabel("PC2")
+# plt.title(f"KNN med k={last_k}")
+# plt.show()
 
