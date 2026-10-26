@@ -40,7 +40,12 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.fit_transform(X_test)
 
 # Initialiser og træn Random Forest-modellen
-rf_model = RandomForestClassifier(n_estimators=200, random_state=42)
+rf_model = RandomForestClassifier(
+    n_estimators=200, 
+    random_state=42,
+    min_samples_leaf=2,
+    min_samples_split=5
+)
 rf_model.fit(X_train, y_train)
 
 # Forudsig på testdata
