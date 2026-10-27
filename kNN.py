@@ -120,8 +120,10 @@ test_data["split"] = "test"
 
 big_data = pd.concat([train_data,test_data], ignore_index=True)
 big_data.to_csv("heart_behandlet.csv", index=False)
-#hvilken idiot lavede index statesne anderledes i samme fucking library
+#hvilken idiot lavede index arguments anderledes i samme fucking library
 
+
+### VIRKER IKKE!!! skal fikse på et eller andet tidspunkt idk
 # from mlxtend.plotting import plot_decision_regions
 # from sklearn.decomposition import PCA
 # X_2d = PCA(n_components=2).fit_transform(X)
@@ -138,3 +140,4 @@ big_data.to_csv("heart_behandlet.csv", index=False)
 # TODO
 # Pipeline?
 # CVGrid
+# plottet oven over
