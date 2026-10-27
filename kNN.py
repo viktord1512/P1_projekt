@@ -6,24 +6,18 @@ from collections import OrderedDict # bedre dictionary
 from sklearn.model_selection import train_test_split # til opdeling af datasæt i trænings- og testdata
 from sklearn.neighbors import KNeighborsClassifier # til kNN-klassifikation
 from sklearn.metrics import accuracy_score # til beregning af nøjagtighed
-from sklearn.decomposition import PCA # hjælper med at visualisere vorees 11 dimentioner til 2D
+from sklearn.decomposition import PCA # hjælper med at visualisere vores 11 dimensioner til 2D
 from sklearn.metrics import confusion_matrix # til beregning af confusion matrix
 from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af kategoriske features
 
 
+
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
+heart["Cholesterol"] = heart["Cholesterol"].replace(0,np.nan)
+
 
 results = OrderedDict()
-
-# standardiser numeriske features
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import Normalizer
-from sklearn.preprocessing import MinMaxScaler
-standard_scaler = StandardScaler()
-norm_scaler = Normalizer()
-min_max_scaler = MinMaxScaler()
-
 
 # nonnumeric_features = [1, 2, 6, 8, 10]
 # numeric_features = [0, 3, 4, 5, 7, 9]
@@ -48,9 +42,18 @@ X_train, X_test, y_train, y_test = train_test_split(
 from sklearn.impute import SimpleImputer
 imputer = SimpleImputer(strategy="median", add_indicator=True)
 
+#impute, derefter scale
 X_train = imputer.fit_transform(X_train)
+X_test = imputer.transform(X_test)
 
-print(heart)
+# scalers
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import MinMaxScaler
+standard_scaler = StandardScaler()
+norm_scaler = Normalizer()
+min_max_scaler = MinMaxScaler()
+
 
 X_train = standard_scaler.fit_transform(X_train)
 X_test = standard_scaler.transform(X_test)
@@ -59,9 +62,11 @@ X_test = standard_scaler.transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.transform(X_test)
 
-# normalize scaler er ass, minmax er tæt på standard, men standard er bedst til datasættet
+kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
+assert X_train.shape[1] == len(kolonne_navne)
 
-last_k = 83
+
+last_k = 21
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
 for n_neighbors in range(1, last_k+1, 2):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
@@ -76,6 +81,8 @@ for n_neighbors in range(1, last_k+1, 2):
     accuracy = accuracy_score(y_test, y_pred)
     results[n_neighbors] = accuracy
     print(f"K = {n_neighbors}: {accuracy:.5f}")
+
+
 
 # Beregning af confusion matrix
 cm = confusion_matrix(y_test, y_pred)
@@ -99,11 +106,21 @@ plt.title("Confusion Matrix")
 plt.show()
 
 # # For at teste k værdier. Viser kun den bedste med dens accuracy, hvis man vil have cm og precision/recall så skal man manuelt sætte k
-sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
-print(f"Best K = {next(reversed(sorted_results))}\n"
-      f"Accuracy = {next(reversed(sorted_results.values()))}")
+# sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
+# print(f"Best K = {next(reversed(sorted_results))}\n"
+#       f"Accuracy = {next(reversed(sorted_results.values()))}")
 
+train_data = pd.DataFrame(X_train, columns=kolonne_navne)
+train_data["HeartDisease"] = y_train
+train_data["split"] = "train"
 
+test_data = pd.DataFrame(X_test, columns=kolonne_navne)
+test_data["HeartDisease"] = y_test
+test_data["split"] = "test"
+
+big_data = pd.concat([train_data,test_data], ignore_index=True)
+big_data.to_csv("heart_behandlet.csv", index=False)
+#hvilken idiot lavede index statesne anderledes i samme fucking library
 
 # from mlxtend.plotting import plot_decision_regions
 # from sklearn.decomposition import PCA
@@ -117,4 +134,5 @@ print(f"Best K = {next(reversed(sorted_results))}\n"
 # plt.ylabel("PC2")
 # plt.title(f"KNN med k={last_k}")
 # plt.show()
+
 

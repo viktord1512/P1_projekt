@@ -18,5 +18,5 @@ from sklearn.impute import SimpleImputer
 imputer = SimpleImputer()
 
 
-heart.to_csv("heart_behandlet") #, sep='\t', encoding='utf-8', index=False, header=True
+heart.to_csv("heart_behandlet.csv", index=False, header=True)
 print((heart["Cholesterol"] == 0).sum())
