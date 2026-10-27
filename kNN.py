@@ -135,4 +135,6 @@ big_data.to_csv("heart_behandlet.csv", index=False)
 # plt.title(f"KNN med k={last_k}")
 # plt.show()
 
-
+# TODO
+# Pipeline?
+# CVGrid
