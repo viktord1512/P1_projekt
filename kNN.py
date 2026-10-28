@@ -14,9 +14,13 @@ from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af katego
 
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
+
+# Tager alle nuller i cholesterol (og i resting BP, men der er legit kun et sted hvor der er 0) og laver dem om til NaN'er.
+# de skal være NaN og ikke 0 fordi 0-værdier kan faktisk være legit i nogle kolonner (som FastingBS og OldPeak), og dem vil vi ikke impute på
 heart["Cholesterol"] = heart["Cholesterol"].replace(0,np.nan)
+heart["RestingBP"] = heart["RestingBP"].replace(0,np.nan)
 
-
+# til noget debugging kode jeg lavede, skal fjernes for CVgrid senere så bar ignore
 results = OrderedDict()
 
 # nonnumeric_features = [1, 2, 6, 8, 10]
@@ -36,9 +40,14 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.30, random_state=42
+    X, y, test_size=0.30, random_state=42,
+    stratify=y
 )
+# https://www.geeksforgeeks.org/machine-learning/stratified-sampling-in-machine-learning/
+# Vores data er rimelig lige, men stratify gør en lille forskel
 
+# laver en imputer der går ud fra medianen af kolonnen (strategy="median) og laver en ny kolonne der siger om data er blevet imputed på den række (add_indicator=True)
+# vigtig note om de nye kolonner den laver er at de bliver ikke automatisk sat ind, det sker længere nede
 from sklearn.impute import SimpleImputer
 imputer = SimpleImputer(strategy="median", add_indicator=True)
 
@@ -46,14 +55,13 @@ imputer = SimpleImputer(strategy="median", add_indicator=True)
 X_train = imputer.fit_transform(X_train)
 X_test = imputer.transform(X_test)
 
-# scalers
+# vi initializer 3 scalers her, men vi bruge kun en som er standard scaleren. Den giver de bedste resultater
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import MinMaxScaler
 standard_scaler = StandardScaler()
 norm_scaler = Normalizer()
 min_max_scaler = MinMaxScaler()
-
 
 X_train = standard_scaler.fit_transform(X_train)
 X_test = standard_scaler.transform(X_test)
@@ -62,12 +70,13 @@ X_test = standard_scaler.transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.transform(X_test)
 
+# her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
-assert X_train.shape[1] == len(kolonne_navne)
-
+# print(kolonne_navne)
 
 last_k = 21
 # Opret kNN-modellen og træn den for forskellige værdier af n_neighbors igennem et loop
+# Bliver sikkert skiftet ud med CVgrid
 for n_neighbors in range(1, last_k+1, 2):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
 
@@ -83,13 +92,13 @@ for n_neighbors in range(1, last_k+1, 2):
     print(f"K = {n_neighbors}: {accuracy:.5f}")
 
 
-
 # Beregning af confusion matrix
 cm = confusion_matrix(y_test, y_pred)
 # visualisering i terminal
 print("Confusion Matrix:")
 print(cm)
 
+# caller bare functions som sklearn har for at få vores precision og recall. Accuracy caller vi igen for shits and giggles
 from sklearn.metrics import precision_score, recall_score
 print(f"Precision: {precision_score(y_test,y_pred)*100:.5}%")
 print(f"Recall: {recall_score(y_test, y_pred)*100:.5}%")
@@ -110,6 +119,7 @@ plt.show()
 # print(f"Best K = {next(reversed(sorted_results))}\n"
 #       f"Accuracy = {next(reversed(sorted_results.values()))}")
 
+# her tager vi vores two behandlet datasæt (x_train og x_test) som vi splittede tidligere for så at sætte dem sammen i en stor csv fil
 train_data = pd.DataFrame(X_train, columns=kolonne_navne)
 train_data["HeartDisease"] = y_train
 train_data["split"] = "train"
@@ -118,6 +128,7 @@ test_data = pd.DataFrame(X_test, columns=kolonne_navne)
 test_data["HeartDisease"] = y_test
 test_data["split"] = "test"
 
+# her sætter vi dem sammen og exporter det som en csv fil
 big_data = pd.concat([train_data,test_data], ignore_index=True)
 big_data.to_csv("heart_behandlet.csv", index=False)
 #hvilken idiot lavede index arguments anderledes i samme fucking library
