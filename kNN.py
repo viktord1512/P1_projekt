@@ -55,13 +55,15 @@ imputer = SimpleImputer(strategy="median", add_indicator=True)
 X_train = imputer.fit_transform(X_train)
 X_test = imputer.transform(X_test)
 
-# vi initializer 3 scalers her, men vi bruge kun en som er standard scaleren. Den giver de bedste resultater
+# vi initializer 3 scalers her, men vi bruge kun en som er standard scaleren. Den giver de bedste resultater *** skal måske ændres til robust***
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import RobustScaler
 standard_scaler = StandardScaler()
 norm_scaler = Normalizer()
 min_max_scaler = MinMaxScaler()
+robust_scaler = RobustScaler()
 
 X_train = standard_scaler.fit_transform(X_train)
 X_test = standard_scaler.transform(X_test)
@@ -69,6 +71,8 @@ X_test = standard_scaler.transform(X_test)
 # X_test = norm_scaler.transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.transform(X_test)
+# X_train = robust_scaler.fit_transform(X_train)
+# X_test = robust_scaler.transform(X_test)
 
 # her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
