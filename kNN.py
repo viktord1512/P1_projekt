@@ -26,8 +26,8 @@ results = OrderedDict()
 # nonnumeric_features = [1, 2, 6, 8, 10]
 # numeric_features = [0, 3, 4, 5, 7, 9]
 
-nonnumeric_features = [1, 2, 6, 8, 10]
-numeric_features = [0, 3, 4, 5, 7, 9]
+nonnumeric_features = [1, 2, 8]
+numeric_features = [0, 3, 4, 5]
 
 #onehot encoding for kategoriske features
 encoder = OneHotEncoder()
@@ -65,14 +65,14 @@ norm_scaler = Normalizer()
 min_max_scaler = MinMaxScaler()
 robust_scaler = RobustScaler()
 
-X_train = standard_scaler.fit_transform(X_train)
-X_test = standard_scaler.transform(X_test)
+# X_train = standard_scaler.fit_transform(X_train)
+# X_test = standard_scaler.transform(X_test)
 # X_train = norm_scaler.fit_transform(X_train)
 # X_test = norm_scaler.transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.transform(X_test)
-# X_train = robust_scaler.fit_transform(X_train)
-# X_test = robust_scaler.transform(X_test)
+X_train = robust_scaler.fit_transform(X_train)
+X_test = robust_scaler.transform(X_test)
 
 # her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
@@ -119,9 +119,9 @@ plt.title("Confusion Matrix")
 plt.show()
 
 # # For at teste k værdier. Viser kun den bedste med dens accuracy, hvis man vil have cm og precision/recall så skal man manuelt sætte k
-# sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
-# print(f"Best K = {next(reversed(sorted_results))}\n"
-#       f"Accuracy = {next(reversed(sorted_results.values()))}")
+sorted_results = dict(sorted(results.items(), key=lambda item:item[1]))
+print(f"Best K = {next(reversed(sorted_results))}\n"
+      f"Accuracy = {next(reversed(sorted_results.values()))}")
 
 # her tager vi vores two behandlet datasæt (x_train og x_test) som vi splittede tidligere for så at sætte dem sammen i en stor csv fil
 train_data = pd.DataFrame(X_train, columns=kolonne_navne)
