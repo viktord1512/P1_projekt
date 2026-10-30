@@ -59,16 +59,20 @@ X_test = imputer.transform(X_test)
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import RobustScaler
 standard_scaler = StandardScaler()
 norm_scaler = Normalizer()
 min_max_scaler = MinMaxScaler()
+robust_scaler = RobustScaler()
 
-X_train = standard_scaler.fit_transform(X_train)
-X_test = standard_scaler.transform(X_test)
+# X_train = standard_scaler.fit_transform(X_train)
+# X_test = standard_scaler.transform(X_test)
 # X_train = norm_scaler.fit_transform(X_train)
 # X_test = norm_scaler.transform(X_test)
 # X_train = min_max_scaler.fit_transform(X_train)
 # X_test = min_max_scaler.transform(X_test)
+# X_train = robust_scaler.fit_transform(X_train)
+# X_test = robust_scaler.transform(X_test)
 
 # her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
@@ -119,7 +123,7 @@ plt.show()
 # print(f"Best K = {next(reversed(sorted_results))}\n"
 #       f"Accuracy = {next(reversed(sorted_results.values()))}")
 
-# her tager vi vores two behandlet datasæt (x_train og x_test) som vi splittede tidligere for så at sætte dem sammen i en stor csv fil
+# Her tager vi vores two behandlet datasæt (x_train og x_test) som vi splittede tidligere for så at sætte dem sammen i en stor csv fil
 train_data = pd.DataFrame(X_train, columns=kolonne_navne)
 train_data["HeartDisease"] = y_train
 train_data["split"] = "train"
@@ -131,7 +135,79 @@ test_data["split"] = "test"
 # her sætter vi dem sammen og exporter det som en csv fil
 big_data = pd.concat([train_data,test_data], ignore_index=True)
 big_data.to_csv("heart_behandlet.csv", index=False)
-#hvilken idiot lavede index arguments anderledes i samme fucking library
+
+
+
+# sammenligning af scaling metoder via grafer
+heart = pd.read_csv("heart.csv")
+heart["Cholesterol"] = heart["Cholesterol"].replace(0, np.nan)
+heart["RestingBP"] = heart["RestingBP"].replace(0, np.nan)
+
+numeric_features = [0, 3, 4, 5, 7, 9]
+kolonner = list(heart.columns[numeric_features])
+X = heart.iloc[:, numeric_features].values
+y = heart.iloc[:, -1].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.30, random_state=42, stratify=y
+)
+
+# Impute på median (kun fit på train)
+X_train = SimpleImputer(strategy="median").fit_transform(X_train)
+
+# ---------- Skalering ----------
+versioner = {
+    "Original": X_train,
+    "StandardScaler": StandardScaler().fit_transform(X_train),
+    "Normalizer": Normalizer().fit_transform(X_train),
+    "MinMaxScaler": MinMaxScaler().fit_transform(X_train),
+    "RobustScaler": RobustScaler().fit_transform(X_train),
+}
+navne = list(versioner.keys())
+farver = ["#7f7f7f", "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+
+# ---------- Billede 1: Boxplots af alle numeriske features ----------
+fig, axes = plt.subplots(1, 5, figsize=(22, 5))
+for ax, navn in zip(axes, navne):
+    ax.boxplot(versioner[navn])
+    ax.set_xticklabels(kolonner, rotation=45)
+    ax.set_title(navn)
+    ax.grid(alpha=0.3)
+fig.suptitle("Fordeling af alle numeriske features før og efter skalering", fontsize=14)
+fig.tight_layout()
+plt.show()
+
+# ---------- Billede 2: Histogram af én feature ----------
+feature = "Cholesterol"
+idx = kolonner.index(feature)
+
+fig, axes = plt.subplots(1, 5, figsize=(22, 4.5))
+for ax, navn, farve in zip(axes, navne, farver):
+    vaerdier = versioner[navn][:, idx]
+    ax.hist(vaerdier, bins=30, color=farve, edgecolor="black", alpha=0.8)
+    ax.set_title(f"{navn}\nmin={vaerdier.min():.2f}, max={vaerdier.max():.2f}")
+    ax.set_xlabel(feature)
+    ax.grid(alpha=0.3)
+axes[0].set_ylabel("Antal")
+fig.suptitle(f"Fordelingen af {feature} før og efter skalering", fontsize=14)
+fig.tight_layout()
+plt.show()
+
+# ---------- Billede 3: Scatterplot af to features ----------
+fx, fy = "Age", "MaxHR"
+ix, iy = kolonner.index(fx), kolonner.index(fy)
+
+fig, axes = plt.subplots(1, 5, figsize=(22, 4.5))
+for ax, navn, farve in zip(axes, navne, farver):
+    ax.scatter(versioner[navn][:, ix], versioner[navn][:, iy], s=12, alpha=0.6, color=farve)
+    ax.set_title(navn)
+    ax.set_xlabel(fx)
+    ax.set_ylabel(fy)
+    ax.grid(alpha=0.3)
+fig.suptitle(f"{fx} vs {fy} før og efter skalering", fontsize=14)
+fig.tight_layout()
+plt.show()
+
 
 
 ### VIRKER IKKE!!! skal fikse på et eller andet tidspunkt idk
