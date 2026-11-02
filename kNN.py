@@ -5,7 +5,7 @@ import numpy as np # til numeriske operationer og array-manipulationer, hvor arr
 from collections import OrderedDict # bedre dictionary
 from sklearn.model_selection import train_test_split # til opdeling af datasæt i trænings- og testdata
 from sklearn.neighbors import KNeighborsClassifier # til kNN-klassifikation
-from sklearn.metrics import accuracy_score # til beregning af nøjagtighed
+from sklearn.metrics import accuracy_score, roc_curve, auc # til beregning af nøjagtighed
 from sklearn.decomposition import PCA # hjælper med at visualisere vores 11 dimensioner til 2D
 from sklearn.metrics import confusion_matrix # til beregning af confusion matrix
 from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af kategoriske features
@@ -90,6 +90,8 @@ for n_neighbors in range(1, last_k+1, 2):
 
     # Forudsigelser på testdata
     y_pred = model.predict(X_test)
+    y_true = y_test.copy()
+    y_scores = model.predict_proba(X_test)[:, list(model.classes_).index(1)]
 
     # Beregn nøjagtighed
     accuracy = accuracy_score(y_test, y_pred)
@@ -156,60 +158,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Impute på median (kun fit på train)
 X_train = SimpleImputer(strategy="median").fit_transform(X_train)
 
-# ---------- Skalering ----------
-versioner = {
-    "Original": X_train,
-    "StandardScaler": StandardScaler().fit_transform(X_train),
-    "Normalizer": Normalizer().fit_transform(X_train),
-    "MinMaxScaler": MinMaxScaler().fit_transform(X_train),
-    "RobustScaler": RobustScaler().fit_transform(X_train),
-}
-navne = list(versioner.keys())
-farver = ["#7f7f7f", "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
-
-# ---------- Billede 1: Boxplots af alle numeriske features ----------
-fig, axes = plt.subplots(1, 5, figsize=(22, 5))
-for ax, navn in zip(axes, navne):
-    ax.boxplot(versioner[navn])
-    ax.set_xticklabels(kolonner, rotation=45)
-    ax.set_title(navn)
-    ax.grid(alpha=0.3)
-fig.suptitle("Fordeling af alle numeriske features før og efter skalering", fontsize=14)
-fig.tight_layout()
-plt.show()
-
-# ---------- Billede 2: Histogram af én feature ----------
-feature = "Cholesterol"
-idx = kolonner.index(feature)
-
-fig, axes = plt.subplots(1, 5, figsize=(22, 4.5))
-for ax, navn, farve in zip(axes, navne, farver):
-    vaerdier = versioner[navn][:, idx]
-    ax.hist(vaerdier, bins=30, color=farve, edgecolor="black", alpha=0.8)
-    ax.set_title(f"{navn}\nmin={vaerdier.min():.2f}, max={vaerdier.max():.2f}")
-    ax.set_xlabel(feature)
-    ax.grid(alpha=0.3)
-axes[0].set_ylabel("Antal")
-fig.suptitle(f"Fordelingen af {feature} før og efter skalering", fontsize=14)
-fig.tight_layout()
-plt.show()
-
-# ---------- Billede 3: Scatterplot af to features ----------
-fx, fy = "Age", "MaxHR"
-ix, iy = kolonner.index(fx), kolonner.index(fy)
-
-fig, axes = plt.subplots(1, 5, figsize=(22, 4.5))
-for ax, navn, farve in zip(axes, navne, farver):
-    ax.scatter(versioner[navn][:, ix], versioner[navn][:, iy], s=12, alpha=0.6, color=farve)
-    ax.set_title(navn)
-    ax.set_xlabel(fx)
-    ax.set_ylabel(fy)
-    ax.grid(alpha=0.3)
-fig.suptitle(f"{fx} vs {fy} før og efter skalering", fontsize=14)
-fig.tight_layout()
-plt.show()
-
-
 
 ### VIRKER IKKE!!! skal fikse på et eller andet tidspunkt idk
 # from mlxtend.plotting import plot_decision_regions
@@ -229,3 +177,22 @@ plt.show()
 # Pipeline?
 # CVGrid
 # plottet oven over
+
+
+# Funktion for at plotte ROC curve
+def plot_roc_curve(y_true, y_scores):
+    fpr, tpr, thresholds = roc_curve(y_true, y_scores)
+    roc_auc = auc(fpr, tpr)
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2,
+             label='kNN with RobustScaler (AUC = %0.2f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve - kNN with RobustScaler')
+    plt.legend(loc="lower right")
+    plt.show()
+
+plot_roc_curve(y_true, y_scores)
