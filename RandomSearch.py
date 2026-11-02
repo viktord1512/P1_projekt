@@ -41,7 +41,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Pipeline 
 Rf_pipe = Pipeline([
     ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
-    ('rbs', RobustScaler()),
+    ('rbs', StandardScaler()),
     ('rf', RandomForestClassifier())
 ])
 

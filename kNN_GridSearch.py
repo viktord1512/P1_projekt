@@ -54,10 +54,10 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Pipeline for kNN med RobustScaler og GridSearchCV
 knn_pipe = Pipeline([
     ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
-    ('rbs', RobustScaler()),
+    ('rbs', StandardScaler()),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 501
+last_k = 51
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2]}]
@@ -71,26 +71,15 @@ print(f"Best cross-validation accuracy: {grid_search.best_score_:.5f}")
 best_model = grid_search.best_estimator_
 y_pred_best = best_model.predict(X_test)
 accuracy_best = accuracy_score(y_test, y_pred_best)
+cm = confusion_matrix(y_test, y_pred_best)
 print(f"Test accuracy with best parameters: {accuracy_best:.5f}")
-print(f"Confusion matrix:\n{confusion_matrix(y_test, y_pred_best)}")
+print(f"Confusion matrix:\n{cm}")
 print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
 
 
 # her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
 # print(kolonne_navne)
-
-# Beregning af confusion matrix
-cm = confusion_matrix(y_test, y_pred_best)
-# visualisering i terminal
-print("Confusion Matrix:")
-print(cm)
-
-# caller bare functions som sklearn har for at få vores precision og recall. Accuracy caller vi igen for shits and giggles
-from sklearn.metrics import precision_score, recall_score
-print(f"Precision: {precision_score(y_test,y_pred_best)*100:.5}%")
-print(f"Recall: {recall_score(y_test, y_pred_best)*100:.5}%")
-print(f"Accuracy: {accuracy_score(y_test, y_pred_best)*100:.5}%")
 
 cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
