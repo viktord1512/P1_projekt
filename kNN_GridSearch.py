@@ -57,7 +57,7 @@ knn_pipe = Pipeline([
     ('rbs', RobustScaler()),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 21
+last_k = 501
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2]}]
