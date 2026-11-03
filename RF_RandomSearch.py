@@ -46,9 +46,10 @@ Rf_pipe = Pipeline([
 ])
 
 params = [{
-        'rf__n_estimators': list(range(100, 6001, 100)),
-        'rf__min_samples_leaf': list(range(1, 21, 1)),
-        'rf__min_samples_split': list(range(2, 41, 1))
+        'rf__n_estimators': list(range(100, 10001, 100)),
+        'rf__min_samples_leaf': list(range(1, 201, 1)),
+        'rf__min_samples_split': list(range(2, 401, 1)),
+        "rf__criterion": ["gini", "entropy"]
 }]
 
 # RandomizedSearchCV for at finde de bedste hyperparametre for Random Forest
