@@ -1,3 +1,4 @@
+from time import time
 import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og confusion matrixer
 import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import pandas as pd # til håndtering af datasæt som DataFrame, hvor dataframes gør det nemt at manipulere og analysere data
@@ -19,6 +20,8 @@ from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
 
+# lav en timer der viser tiden det tager at køre koden
+start_time = time()
 
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
@@ -111,12 +114,12 @@ test_data = pd.DataFrame(X_test_proc, columns=kolonne_navne)
 test_data["HeartDisease"] = y_test
 test_data["split"] = "test"
 
-# her sætter vi dem sammen og exporter det som en csv fil
+# Her sætter vi dem sammen og exporter det som en csv fil
 big_data = pd.concat([train_data,test_data], ignore_index=True)
 big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
 
 
-### VIRKER IKKE!!! skal fikse på et eller andet tidspunkt idk
+### VIRKER IKKE!!! Skal fikse på et eller andet tidspunkt idk
 # from mlxtend.plotting import plot_decision_regions
 # from sklearn.decomposition import PCA
 # X_2d = PCA(n_components=2).fit_transform(X)
@@ -153,3 +156,5 @@ big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
 #     plt.show()
 
 # plot_roc_curve(y_true, y_scores)
+
+print(f"Køretid: {time() - start_time:.2f} sekunder")

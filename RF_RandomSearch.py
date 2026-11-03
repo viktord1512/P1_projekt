@@ -38,7 +38,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42 # 0.2 svarer til 20% af dataene som testes
 )
 
-# Pipeline 
+# Pipeline for Random Forest med StandardScaler og SimpleImputer
 Rf_pipe = Pipeline([
     ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
     ('rbs', StandardScaler()),
@@ -51,6 +51,7 @@ params = [{
         'rf__min_samples_split': list(range(2, 41, 1))
 }]
 
+# RandomizedSearchCV for at finde de bedste hyperparametre for Random Forest
 grid_search = RandomizedSearchCV(Rf_pipe, params, cv=5, scoring='accuracy', n_jobs=-1, n_iter=10)
 grid_search.fit(X_train, y_train)
 print(f"Best parameters: {grid_search.best_params_}")
@@ -64,7 +65,7 @@ print(f"Test accuracy with best parameters: {accuracy_best:.5f}")
 print(f"Confusion matrix:\n{confusion_matrix(y_test, y_pred_best)}")
 print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
 
-# # confusion matrix med visualization
+# Confusion matrix med visualization
 cm = confusion_matrix(y_test, y_pred_best)
 print("Confusion Matrix:")
 print(cm)
@@ -78,6 +79,6 @@ plt.ylabel("Actual")
 plt.title("Confusion Matrix")
 plt.show()
 
-# Koden der skal måles går her (hele scriptet)
+# Koden der skal måle tiden går her (hele scriptet)
 end_time = time.time()
 print(f"Tiden det tog at køre koden: {end_time - start_time:.2f} sekunder")
