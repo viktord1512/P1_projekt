@@ -65,10 +65,10 @@ params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2]}]
 
+# Udfør grid search for at finde de bedste hyperparametre for kNN
+print("Starting grid search...")
 grid_search = GridSearchCV(knn_pipe, params, cv=5, scoring='accuracy', n_jobs=-1)
 grid_search.fit(X_train, y_train)
-print(f"Best parameters: {grid_search.best_params_}")
-print(f"Best cross-validation accuracy: {grid_search.best_score_:.5f}")
 
 # Evaluering på testdata med de bedste parametre
 best_model = grid_search.best_estimator_
@@ -155,6 +155,11 @@ big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
 #     plt.legend(loc="lower right")
 #     plt.show()
 
-# plot_roc_curve(y_true, y_scores)
+# print de bedste parametre og score
+print(f"Best parameters: {grid_search.best_params_}")
+print(f"Best cross-validation accuracy: {grid_search.best_score_:.5f}")
+cv_results = pd.DataFrame(grid_search.cv_results_)
+cv_results.sort_values(by='mean_test_score', ascending=False, inplace=True)
+print(cv_results)
 
 print(f"Køretid: {time() - start_time:.2f} sekunder")
