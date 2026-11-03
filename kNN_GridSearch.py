@@ -8,9 +8,7 @@ from sklearn.model_selection import train_test_split # til opdeling af datasæt 
 from sklearn.neighbors import KNeighborsClassifier # til kNN-klassifikation
 from sklearn.metrics import accuracy_score, roc_curve, auc # til beregning af nøjagtighed
 from sklearn.decomposition import PCA # hjælper med at visualisere vores 11 dimensioner til 2D
-from sklearn.metrics import confusion_matrix # til beregning af confusion matrix
 from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af kategoriske features
-from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.pipeline import Pipeline
@@ -57,7 +55,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Pipeline for kNN med RobustScaler og GridSearchCV
 knn_pipe = Pipeline([
     ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
-    ('rbs', StandardScaler()),
+    ('scaler', StandardScaler()),
     ('knn', KNeighborsClassifier())
 ])
 last_k = 51
@@ -158,7 +156,8 @@ big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
 # print de bedste parametre og score
 print(f"Best parameters: {grid_search.best_params_}")
 print(f"Best cross-validation accuracy: {grid_search.best_score_:.5f}")
-cv_results = pd.DataFrame(grid_search.cv_results_)
+cv_results = pd.DataFrame(
+    grid_search.cv_results_)
 cv_results.sort_values(by='mean_test_score', ascending=False, inplace=True)
 print(cv_results)
 
