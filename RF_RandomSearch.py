@@ -4,9 +4,9 @@ import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og confusion matrixer
 from sklearn.ensemble import RandomForestClassifier # til Random Forest-klassifikation
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import GridSearchCV, train_test_split, RandomizedSearchCV # til opdeling af datasæt i trænings- og testdata
+from sklearn.model_selection import train_test_split, RandomizedSearchCV # til opdeling af datasæt i trænings- og testdata
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, RobustScaler # til one-hot encoding og standardisering af features
+from sklearn.preprocessing import OneHotEncoder # til one-hot encoding og standardisering af features
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix # til evaluering af modelens præstation og beregning af confusion matrix
 import time
 
