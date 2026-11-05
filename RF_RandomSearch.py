@@ -45,9 +45,9 @@ Rf_pipe = Pipeline([
 ])
 
 params = [{
-        'rf__n_estimators': list(range(100, 10001, 100)),
-        'rf__min_samples_leaf': list(range(1, 201, 1)),
-        'rf__min_samples_split': list(range(2, 401, 1)),
+        'rf__n_estimators': list(range(100, 1001, 100)),
+        'rf__min_samples_leaf': list(range(1, 21, 1)),
+        'rf__min_samples_split': list(range(2, 41, 1)),
         "rf__criterion": ["gini", "entropy"]
 }]
 
@@ -64,6 +64,10 @@ accuracy_best = accuracy_score(y_test, y_pred_best)
 print(f"Test accuracy with best parameters: {accuracy_best:.5f}")
 print(f"Confusion matrix:\n{confusion_matrix(y_test, y_pred_best)}")
 print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
+
+
+
+class_report = classification_report(y_test, y_pred_best, output_dict=True)
 
 # Confusion matrix med visualization
 cm = confusion_matrix(y_test, y_pred_best)
@@ -82,3 +86,23 @@ plt.show()
 # Koden der skal måle tiden går her (hele scriptet)
 end_time = time.time()
 print(f"Tiden det tog at køre koden: {end_time - start_time:.2f} sekunder")
+
+# https://medium.com/@Doug-Creates/plotting-scikit-learn-classification-report-for-analysis-0229447fe232
+def plot_classification_report_with_support(report):
+    labels = list(report.keys())[:-3]  # Exclude 'accuracy', 'macro avg', 'weighted avg'
+    metrics = ['precision', 'recall', 'f1-score', 'support']
+    data = np.array([[report[label][metric] for metric in metrics] for label in labels])
+    fig, ax = plt.subplots(figsize=(12, 6))
+    cax = ax.matshow(data, cmap='coolwarm')
+    plt.xticks(range(len(metrics)), metrics)
+    plt.yticks(range(len(labels)), labels)
+    plt.colorbar(cax)
+    # Adding the text
+    for (i, j), val in np.ndenumerate(data):
+        ax.text(j, i, f'{val:.2f}', ha='center', va='center', color='white')
+    plt.xlabel('Metrics')
+    plt.ylabel('Classes')
+    plt.title('Classification Report with Support')
+    plt.show()
+
+plot_classification_report_with_support(class_report)
