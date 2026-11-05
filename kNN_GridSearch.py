@@ -161,4 +161,28 @@ cv_results = pd.DataFrame(
 cv_results.sort_values(by='mean_test_score', ascending=False, inplace=True)
 print(cv_results)
 
+class_report = classification_report(y_test, y_pred_best, output_dict=True)
+
+
+# https://medium.com/@Doug-Creates/plotting-scikit-learn-classification-report-for-analysis-0229447fe232
+def plot_classification_report_with_support(report):
+    labels = list(report.keys())[:-3]  # Exclude 'accuracy', 'macro avg', 'weighted avg'
+    metrics = ['precision', 'recall', 'f1-score', 'support']
+    data = np.array([[report[label][metric] for metric in metrics] for label in labels])
+    fig, ax = plt.subplots(figsize=(12, 6))
+    cax = ax.matshow(data, cmap='coolwarm')
+    plt.xticks(range(len(metrics)), metrics)
+    plt.yticks(range(len(labels)), labels)
+    plt.colorbar(cax)
+    # Adding the text
+    for (i, j), val in np.ndenumerate(data):
+        ax.text(j, i, f'{val:.2f}', ha='center', va='center', color='white')
+    plt.xlabel('Metrics')
+    plt.ylabel('Classes')
+    plt.title('Classification Report with Support')
+    plt.show()
+
+plot_classification_report_with_support(class_report)
+
+
 print(f"Køretid: {time() - start_time:.2f} sekunder")
