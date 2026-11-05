@@ -76,11 +76,13 @@ print(cm)
 
 cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
+
 plt.figure(figsize=(8, 6))
 sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
-plt.title("Confusion Matrix")
+best_n_estimators = grid_search.best_params_['rf__n_estimators']
+plt.title(f"Confusion Matrix - Random Forest with best n_estimators={best_n_estimators}")
 plt.show()
 
 # Koden der skal måle tiden går her (hele scriptet)
