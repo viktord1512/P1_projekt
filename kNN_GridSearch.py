@@ -35,14 +35,20 @@ heart["RestingBP"] = heart["RestingBP"].replace(0,np.nan)
 nonnumeric_features = [1, 2, 8]
 numeric_features = [0, 3, 4, 5]
 
+
+
 #onehot encoding for kategoriske features
 encoder = OneHotEncoder()
 X_categorical = encoder.fit_transform(heart.iloc[:, nonnumeric_features]).toarray()
 X_numerical = heart.iloc[:, numeric_features].values
 
+
+
 # Gemmer vores matrix, som er en liste af en liste
 X = np.hstack((X_numerical, X_categorical))
 y = heart.iloc[:, -1].values
+
+
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
@@ -58,7 +64,7 @@ knn_pipe = Pipeline([
     ('scaler', StandardScaler()),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 500
+last_k = 100
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2],
@@ -78,7 +84,6 @@ print(f"Test accuracy with best parameters: {accuracy_best:.5f}")
 print(f"Confusion matrix:\n{cm}")
 print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
 
-
 # her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
 # print(kolonne_navne)
@@ -90,7 +95,8 @@ plt.figure(figsize=(8, 6))
 sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
-plt.title("Confusion Matrix")
+best_k = grid_search.best_params_['knn__n_neighbors']
+plt.title(f"Confusion Matrix - kNN with best k={best_k}")
 plt.show()
 
 # Hent de behandlede data fra pipeline'en
@@ -117,43 +123,6 @@ test_data["split"] = "test"
 big_data = pd.concat([train_data,test_data], ignore_index=True)
 big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
 
-
-### VIRKER IKKE!!! Skal fikse på et eller andet tidspunkt idk
-# from mlxtend.plotting import plot_decision_regions
-# from sklearn.decomposition import PCA
-# X_2d = PCA(n_components=2).fit_transform(X)
-#
-# # Træn en kNN på de 2D-data (kun til plottet)
-# viz_model = KNeighborsClassifier(n_neighbors=last_k).fit(X_2d, y)
-#
-# plot_decision_regions(X=X_2d, y=y, clf=viz_model, legend=2)
-# plt.xlabel("PC1")
-# plt.ylabel("PC2")
-# plt.title(f"KNN med k={last_k}")
-# plt.show()
-
-# TODO
-# Pipeline?
-# CVGrid
-# plottet oven over
-
-
-# # Funktion for at plotte ROC curve
-# def plot_roc_curve(y_true, y_scores):
-#     fpr, tpr, thresholds = roc_curve(y_true, y_scores)
-#     roc_auc = auc(fpr, tpr)
-#     plt.figure()
-#     plt.plot(fpr, tpr, color='darkorange', lw=2,
-#              label='kNN with RobustScaler (AUC = %0.2f)' % roc_auc)
-#     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-#     plt.xlim([0.0, 1.0])
-#     plt.ylim([0.0, 1.05])
-#     plt.xlabel('False Positive Rate')
-#     plt.ylabel('True Positive Rate')
-#     plt.title('ROC Curve - kNN with RobustScaler')
-#     plt.legend(loc="lower right")
-#     plt.show()
-
 # print de bedste parametre og score
 print(f"Best parameters: {grid_search.best_params_}")
 print(f"Best cross-validation accuracy: {grid_search.best_score_:.5f}")
@@ -161,10 +130,11 @@ cv_results = pd.DataFrame(
     grid_search.cv_results_)
 cv_results.sort_values(by='mean_test_score', ascending=False, inplace=True)
 print(cv_results)
-
+print("Classification Report:")
 class_report = classification_report(y_test, y_pred_best, output_dict=True)
 
 
+# print classification report
 # https://medium.com/@Doug-Creates/plotting-scikit-learn-classification-report-for-analysis-0229447fe232
 def plot_classification_report_with_support(report):
     labels = list(report.keys())[:-3]  # Exclude 'accuracy', 'macro avg', 'weighted avg'
