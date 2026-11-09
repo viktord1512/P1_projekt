@@ -4,9 +4,9 @@ import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og confusion matrixer
 from sklearn.ensemble import RandomForestClassifier # til Random Forest-klassifikation
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import GridSearchCV, train_test_split, RandomizedSearchCV # til opdeling af datasæt i trænings- og testdata
+from sklearn.model_selection import train_test_split, RandomizedSearchCV # til opdeling af datasæt i trænings- og testdata
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, RobustScaler # til one-hot encoding og standardisering af features
+from sklearn.preprocessing import OneHotEncoder # til one-hot encoding og standardisering af features
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix # til evaluering af modelens præstation og beregning af confusion matrix
 import time
 
@@ -45,9 +45,9 @@ Rf_pipe = Pipeline([
 ])
 
 params = [{
-        'rf__n_estimators': list(range(100, 1001, 100)),
-        'rf__min_samples_leaf': list(range(1, 21, 1)),
-        'rf__min_samples_split': list(range(2, 41, 1)),
+        'rf__n_estimators': list(range(100, 10001, 100)),
+        'rf__min_samples_leaf': list(range(1, 201, 1)),
+        'rf__min_samples_split': list(range(2, 401, 1)),
         "rf__criterion": ["gini", "entropy"]
 }]
 
