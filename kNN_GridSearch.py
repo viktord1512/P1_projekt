@@ -3,20 +3,14 @@ import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og conf
 import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import pandas as pd # til håndtering af datasæt som DataFrame, hvor dataframes gør det nemt at manipulere og analysere data
 import numpy as np # til numeriske operationer og array-manipulationer, hvor arrays bruges til at gemme og manipulere data effektivt
-from collections import OrderedDict # bedre dictionary
-from sklearn.model_selection import train_test_split # til opdeling af datasæt i trænings- og testdata
 from sklearn.neighbors import KNeighborsClassifier # til kNN-klassifikation
-from sklearn.metrics import accuracy_score, roc_curve, auc # til beregning af nøjagtighed
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.decomposition import PCA # hjælper med at visualisere vores 11 dimensioner til 2D
-from sklearn.preprocessing import OneHotEncoder # til one-hot encoding af kategoriske features
+from sklearn.preprocessing import OneHotEncoder, RobustScaler, StandardScaler, Normalizer, MinMaxScaler
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import RobustScaler
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import Normalizer
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.impute import SimpleImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import SimpleImputer, IterativeImputer
 
 # lav en timer der viser tiden det tager at køre koden
 start_time = time()
@@ -60,15 +54,20 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # Pipeline for kNN med RobustScaler og GridSearchCV
 knn_pipe = Pipeline([
-    ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
+    #('imputer', SimpleImputer(strategy="median", add_indicator=True)),
+    ("imputer", IterativeImputer()),
     ('scaler', StandardScaler()),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 100
+last_k = 200
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2],
-         'scaler': [StandardScaler(), RobustScaler()]}]
+         'scaler': [StandardScaler(), RobustScaler()],
+         "imputer": [SimpleImputer(strategy="median", add_indicator=True),
+                     IterativeImputer(initial_strategy="median", add_indicator=True,
+                                      random_state=43)]
+}]
 
 # Udfør grid search for at finde de bedste hyperparametre for kNN
 print("Starting grid search...")
