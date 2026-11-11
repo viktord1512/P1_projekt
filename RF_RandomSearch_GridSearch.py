@@ -96,15 +96,37 @@ print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
 
 class_report = classification_report(y_test, y_pred_best, output_dict=True)
 
+
 # Confusion matrix med visualization
 cm = confusion_matrix(y_test, y_pred_best)
-cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
+row_totals = cm.sum(axis=1, keepdims=True)
+cm_percent = np.divide(cm, row_totals, out=np.zeros_like(cm, dtype=float), where=row_totals != 0) * 100
 best_n_estimators = random_search.best_params_['rf__n_estimators']
-plt.title(f"Confusion Matrix - Random Forest with best n_estimators={best_n_estimators}")
+
+# Confusion matrix: Vis antal med navnene TN, FP, FN og TP
+if cm.shape == (2, 2):
+    cell_names = np.array([["TN", "FP"], ["FN", "TP"]])
+    count_annotations = np.array([
+        [f"{cell_names[i, j]}\n{cm[i, j]}" for j in range(2)]
+        for i in range(2)
+    ])
+else:
+    count_annotations = cm.astype(str)
+
+# Vis begge confusion matrixer i samme vindue
+fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+sns.heatmap(cm, annot=count_annotations, fmt="", cmap="Blues", cbar=False, ax=axes[0])
+axes[0].set_xlabel("Predicted")
+axes[0].set_ylabel("Actual")
+axes[0].set_title(f"Confusion Matrix (antal) - Random Forest, n_estimators={best_n_estimators}")
+
+# Vis de samme værdier som procenter af hver faktisk klasse
+sns.heatmap(cm_percent, annot=True, fmt=".1f", cmap="Blues", vmin=0, vmax=100,
+            cbar_kws={"label": "%"}, ax=axes[1])
+axes[1].set_xlabel("Predicted")
+axes[1].set_ylabel("Actual")
+axes[1].set_title(f"Confusion Matrix (procent) - Random Forest, n_estimators={best_n_estimators}")
+plt.tight_layout()
 plt.show()
 
 # Koden der skal måle tiden går her (hele scriptet)

@@ -70,10 +70,12 @@ params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__p': [1, 2],
          'scaler': [StandardScaler(), RobustScaler()]}]
 
+
 # Udfør grid search for at finde de bedste hyperparametre for kNN
 print("Starting grid search...")
 grid_search = GridSearchCV(knn_pipe, params, cv=5, scoring='accuracy', n_jobs=-1)
 grid_search.fit(X_train, y_train)
+
 
 # Evaluering på testdata med de bedste parametre
 best_model = grid_search.best_estimator_
@@ -84,31 +86,54 @@ print(f"Test accuracy with best parameters: {accuracy_best:.5f}")
 print(f"Confusion matrix:\n{cm}")
 print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
 
-# her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
+
+# Her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
 # print(kolonne_navne)
 
 cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+cm_percent = cm_normalized * 100
 
-# visualisering af confusion matrix
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Blues")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-best_k = grid_search.best_params_['knn__n_neighbors']
-plt.title(f"Confusion Matrix - kNN with best k={best_k}")
+
+# Confusion matrix: Vis antal med navnene TN, FP, FN og TP
+if cm.shape == (2, 2):
+    cell_names = np.array([["TN", "FP"], ["FN", "TP"]])
+    count_annotations = np.array([
+        [f"{cell_names[i, j]}\n{cm[i, j]}" for j in range(2)]
+        for i in range(2)
+    ])
+else:
+    count_annotations = cm.astype(str)
+
+# Vis begge confusion matrixer i samme vindue
+fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+sns.heatmap(cm, annot=count_annotations, fmt="", cmap="Blues", cbar=False, ax=axes[0])
+axes[0].set_xlabel("Predicted")
+axes[0].set_ylabel("Actual")
+axes[0].set_title(f"Confusion Matrix (antal) - kNN, k={grid_search.best_params_['knn__n_neighbors']}")
+
+# Vis de samme værdier som procenter af hver faktisk klasse
+sns.heatmap(cm_percent, annot=True, fmt=".1f", cmap="Blues", vmin=0, vmax=100,
+            cbar_kws={"label": "%"}, ax=axes[1])
+axes[1].set_xlabel("Predicted")
+axes[1].set_ylabel("Actual")
+axes[1].set_title(f"Confusion Matrix (procent) - kNN, k={grid_search.best_params_['knn__n_neighbors']}")
+plt.tight_layout()
 plt.show()
+
 
 # Hent de behandlede data fra pipeline'en
 preprocessor = best_model[: -1]
 X_train_proc = preprocessor.transform(X_train)
 X_test_proc = preprocessor.transform(X_test)
 
+
 # Lav kolonnenavne dynamisk, så de matcher de behandlede data fra pipeline'en
 base_names = (list(heart.columns[numeric_features])
               + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])))
 missing_idx = best_model.named_steps['imputer'].indicator_.features_
 kolonne_navne = base_names + [f"{base_names[i]}_missing" for i in missing_idx]
+
 
 # Her tager vi vores two behandlet datasæt (x_train og x_test) som vi splittede tidligere for så at sætte dem sammen i en stor csv fil
 train_data = pd.DataFrame(X_train_proc, columns=kolonne_navne)
@@ -119,9 +144,11 @@ test_data = pd.DataFrame(X_test_proc, columns=kolonne_navne)
 test_data["HeartDisease"] = y_test
 test_data["split"] = "test"
 
+
 # Her sætter vi dem sammen og exporter det som en csv fil
 big_data = pd.concat([train_data,test_data], ignore_index=True)
 big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
+
 
 # print de bedste parametre og score
 print(f"Best parameters: {grid_search.best_params_}")
