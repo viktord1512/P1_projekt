@@ -2,8 +2,10 @@ import numpy as np # til numeriske operationer og array-manipulationer
 import pandas as pd # til håndtering af datasæt som DataFrame
 import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og confusion matrixer
+from sklearn import gaussian_process
 from sklearn.ensemble import RandomForestClassifier # til Random Forest-klassifikation
-from sklearn.impute import SimpleImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import SimpleImputer, IterativeImputer, KNNImputer
 from sklearn.model_selection import train_test_split, RandomizedSearchCV # til opdeling af datasæt i trænings- og testdata
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder # til one-hot encoding og standardisering af features
@@ -40,7 +42,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # Pipeline for Random Forest med StandardScaler og SimpleImputer
 Rf_pipe = Pipeline([
-    ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
+    #('imputer', SimpleImputer(strategy="median", add_indicator=True)),
+    ('imputer', IterativeImputer()),
     ('rf', RandomForestClassifier())
 ])
 
@@ -48,7 +51,9 @@ params = [{
         'rf__n_estimators': list(range(100, 10001, 100)),
         'rf__min_samples_leaf': list(range(1, 201, 1)),
         'rf__min_samples_split': list(range(2, 401, 1)),
-        "rf__criterion": ["gini", "entropy"]
+        "rf__criterion": ["gini", "entropy"],
+        "imputer": [SimpleImputer(strategy="median", add_indicator=True),
+                    IterativeImputer(random_state=43, initial_strategy="median", sample_posterior=True, add_indicator=True)]
 }]
 
 # RandomizedSearchCV for at finde de bedste hyperparametre for Random Forest
