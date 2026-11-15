@@ -17,6 +17,9 @@ start_time = time.time()
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
 
+heart["Cholesterol"] = heart["Cholesterol"].replace(0,np.nan)
+heart["RestingBP"] = heart["RestingBP"].replace(0,np.nan)
+
 # Onehot encoding for kategoriske features
 # nonnumeric_features = [1, 2, 6, 8, 10]
 # numeric_features = [0, 3, 4, 5, 7, 9]
