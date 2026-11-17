@@ -46,7 +46,7 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.15, random_state=42,
+    X, y, test_size=0.2, random_state=42,
     stratify=y
 )
 # https://www.geeksforgeeks.org/machine-learning/stratified-sampling-in-machine-learning/
