@@ -3,7 +3,8 @@ import pandas as pd # til håndtering af datasæt som DataFrame
 import seaborn as sns # til udregning af heatmaps, fx confusion matrix
 import matplotlib.pyplot as plt # til visualisering af diagrammer, plots og confusion matrixer
 from sklearn.ensemble import RandomForestClassifier # til Random Forest-klassifikation
-from sklearn.impute import SimpleImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import SimpleImputer, IterativeImputer
 from sklearn.model_selection import GridSearchCV, train_test_split, RandomizedSearchCV # til opdeling af datasæt i trænings- og testdata
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, RobustScaler # til one-hot encoding og standardisering af features
@@ -16,6 +17,9 @@ start_time = time.time()
 
 # Indlæs heart-datasættet
 heart = pd.read_csv("heart.csv")
+
+heart["Cholesterol"] = heart["Cholesterol"].replace(0,np.nan)
+heart["RestingBP"] = heart["RestingBP"].replace(0,np.nan)
 
 # Onehot encoding for kategoriske features
 # nonnumeric_features = [1, 2, 6, 8, 10]
@@ -45,6 +49,9 @@ Rf_pipe = Pipeline([
 ])
 
 params = [{
+        "imputer": [SimpleImputer(strategy="median", add_indicator=True),
+                IterativeImputer(initial_strategy="median", add_indicator=True,
+                                 random_state=43)],
         'rf__n_estimators': list(range(100, 1001, 100)),
         'rf__min_samples_leaf': list(range(1, 21, 1)),
         'rf__min_samples_split': list(range(2, 41, 1)),
