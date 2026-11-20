@@ -48,7 +48,7 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42,
+    X, y, test_size=0.2, random_state=44,
     stratify=y
 )
 # https://www.geeksforgeeks.org/machine-learning/stratified-sampling-in-machine-learning/
@@ -57,11 +57,11 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Pipeline for kNN med RobustScaler og GridSearchCV
 knn_pipe = Pipeline([
     #('imputer', SimpleImputer(strategy="median", add_indicator=True)),
-    ("imputer", IterativeImputer()),
-    ('scaler', StandardScaler()),
+    # ("imputer", IterativeImputer()),
+    # ('scaler', StandardScaler()),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 200
+last_k = 40
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2],
@@ -100,7 +100,7 @@ plt.step(recall_test, precision_test, where="post",
          linewidth=2, label=f"Test (AP = {ap_test:.3f})")
 plt.xlabel("Recall (sensitivitet)")
 plt.ylabel("Precision")
-plt.title("PR-kurve for kNN – GridSearchCV")
+plt.title("PR-kurve for kNN - GridSearchCV")
 plt.legend()
 plt.grid(alpha=0.3)
 plt.xlim(0, 1)
@@ -125,6 +125,10 @@ print(f"Classification report:\n{classification_report(y_test, y_pred_best)}")
 
 
 # Her tager vi og laver en liste af vores numeric_features' navne, så det samme på nonnumeric_features og så sætter vi vores indicator fra imputeren
+# Beregn confusion matrix på træningsdata til visualiseringen
+y_pred_train = best_model.predict(X_train)
+cm = confusion_matrix(y_train, y_pred_train)
+
 kolonne_navne = list(heart.columns[numeric_features]) + list(encoder.get_feature_names_out(heart.columns[nonnumeric_features])) + ["Cholesterol_missing"]
 # print(kolonne_navne)
 
@@ -148,6 +152,7 @@ sns.heatmap(cm, annot=count_annotations, fmt="", cmap="Blues", cbar=False, ax=ax
 axes[0].set_xlabel("Predicted")
 axes[0].set_ylabel("Actual")
 axes[0].set_title(f"Confusion Matrix (antal) - kNN, k={grid_search.best_params_['knn__n_neighbors']}")
+axes[0].set_title(f"Confusion Matrix træning (antal) - kNN, k={grid_search.best_params_['knn__n_neighbors']}")
 
 # Vis de samme værdier som procenter af hver faktisk klasse
 sns.heatmap(cm_percent, annot=True, fmt=".1f", cmap="Blues", vmin=0, vmax=100,
@@ -155,6 +160,7 @@ sns.heatmap(cm_percent, annot=True, fmt=".1f", cmap="Blues", vmin=0, vmax=100,
 axes[1].set_xlabel("Predicted")
 axes[1].set_ylabel("Actual")
 axes[1].set_title(f"Confusion Matrix (procent) - kNN, k={grid_search.best_params_['knn__n_neighbors']}")
+axes[1].set_title(f"Confusion Matrix træning (procent) - kNN, k={grid_search.best_params_['knn__n_neighbors']}")
 plt.tight_layout()
 plt.show()
 
@@ -190,6 +196,7 @@ big_data.to_csv("heart_behandlet_gridSearch.csv", index=False)
 # print de bedste parametre og score
 print(f"Best parameters: {grid_search.best_params_}")
 print(f"Best cross-validation accuracy: {grid_search.best_score_:.5f}")
+print(f"Køretid: {time() - start_time:.2f} sekunder")
 cv_results = pd.DataFrame(
     grid_search.cv_results_)
 cv_results.sort_values(by='mean_test_score', ascending=False, inplace=True)
@@ -220,4 +227,12 @@ def plot_classification_report_with_support(report):
 plot_classification_report_with_support(class_report)
 
 
-print(f"Køretid: {time() - start_time:.2f} sekunder")
+# Confusion matrix: Vis antal med navnene TN, FP, FN og TP
+if cm.shape == (2, 2):
+    cell_names = np.array([["TN", "FP"], ["FN", "TP"]])
+    count_annotations = np.array([
+        [f"{cell_names[i, j]}\n{cm[i, j]}" for j in range(2)]
+        for i in range(2)
+    ])
+else:
+    count_annotations = cm.astype(str)
