@@ -48,7 +48,7 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i trænings- og testdata
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=44,
+    X, y, test_size=0.2, random_state=4,
     stratify=y
 )
 # https://www.geeksforgeeks.org/machine-learning/stratified-sampling-in-machine-learning/
@@ -56,12 +56,12 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # Pipeline for kNN med RobustScaler og GridSearchCV
 knn_pipe = Pipeline([
-    #('imputer', SimpleImputer(strategy="median", add_indicator=True)),
-    # ("imputer", IterativeImputer()),
-    # ('scaler', StandardScaler()),
+    ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
+    ("imputer", IterativeImputer()),
+    ('scaler', StandardScaler()),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 40
+last_k = 50
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2],
