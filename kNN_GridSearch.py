@@ -55,18 +55,18 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Pipeline for kNN med RobustScaler og GridSearchCV
 knn_pipe = Pipeline([
     #('imputer', SimpleImputer(strategy="median", add_indicator=True)),
-    ("imputer", IterativeImputer()),
-    ('scaler', StandardScaler()),
+    ("imputer", None),
+    ('scaler', None),
     ('knn', KNeighborsClassifier())
 ])
-last_k = 40
+last_k = 100
 params = [{'knn__n_neighbors': list(range(1, last_k+1, 2)),
          'knn__weights': ['uniform', 'distance'],
          'knn__p': [1, 2],
          'scaler': [StandardScaler(), RobustScaler()],
          "imputer": [SimpleImputer(strategy="median", add_indicator=True),
                      IterativeImputer(initial_strategy="median", add_indicator=True,
-                                      random_state=43)]
+                                      random_state=42)]
 }]
 
 
