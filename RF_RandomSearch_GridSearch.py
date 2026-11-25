@@ -45,13 +45,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # Pipeline for Random Forest med StandardScaler og SimpleImputer
 Rf_pipe = Pipeline([
-<<<<<<< Updated upstream
     ('imputer', None),
-    ('rf', RandomForestClassifier())
-=======
-    ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
     ('rf', RandomForestClassifier(random_state=42))
->>>>>>> Stashed changes
 ])
 
 params = [{
