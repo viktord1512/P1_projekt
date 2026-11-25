@@ -39,13 +39,19 @@ y = heart.iloc[:, -1].values
 
 # Opdel data i træn- og testdata (80% træning, 20% test)
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42 # 0.2 svarer til 20% af dataene som testes
+    X, y, test_size=0.2, random_state=42, 
+    stratify=y
 )
 
 # Pipeline for Random Forest med StandardScaler og SimpleImputer
 Rf_pipe = Pipeline([
+<<<<<<< Updated upstream
     ('imputer', None),
     ('rf', RandomForestClassifier())
+=======
+    ('imputer', SimpleImputer(strategy="median", add_indicator=True)),
+    ('rf', RandomForestClassifier(random_state=42))
+>>>>>>> Stashed changes
 ])
 
 params = [{
@@ -60,7 +66,7 @@ params = [{
 
 # RandomizedSearchCV for at finde de bedste hyperparametre for Random Forest
 print("Starting RandomizedSearchCV...")
-random_search = RandomizedSearchCV(Rf_pipe, params, cv=5, scoring='accuracy', n_jobs=-1, n_iter=10)
+random_search = RandomizedSearchCV(Rf_pipe, params, cv=5, scoring='accuracy', n_jobs=-1, n_iter=10, random_state=42)
 random_search.fit(X_train, y_train)
 print(f"Best parameters: {random_search.best_params_}")
 print(f"Best cross-validation accuracy: {random_search.best_score_:.5f}")
@@ -70,6 +76,7 @@ print("\n")
 print("Starting fine-tuning with GridSearchCV...")
 grid_search_best_params = random_search.best_params_
 params_fine_tune = [{
+    'imputer': [grid_search_best_params['imputer']],
     'rf__n_estimators': [grid_search_best_params['rf__n_estimators'] - 100, 
                          grid_search_best_params['rf__n_estimators'], 
                          grid_search_best_params['rf__n_estimators'] + 100],
@@ -108,7 +115,7 @@ class_report = classification_report(y_test, y_pred_best, output_dict=True)
 cm = confusion_matrix(y_test, y_pred_best)
 row_totals = cm.sum(axis=1, keepdims=True)
 cm_percent = np.divide(cm, row_totals, out=np.zeros_like(cm, dtype=float), where=row_totals != 0) * 100
-best_n_estimators = random_search.best_params_['rf__n_estimators']
+best_n_estimators = grid_search_fine.best_params_['rf__n_estimators']
 
 # Confusion matrix: Vis antal med navnene TN, FP, FN og TP
 if cm.shape == (2, 2):
